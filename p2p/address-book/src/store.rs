@@ -13,24 +13,28 @@ use crate::{peer_list::PeerList, AddressBookConfig, BorshNetworkZone};
 struct SerPeerDataV1<'a, A: NetZoneAddress> {
     white_list: Vec<&'a ZoneSpecificPeerListEntryBase<A>>,
     gray_list: Vec<&'a ZoneSpecificPeerListEntryBase<A>>,
+    banned_peers: &'a HashMap<<A as NetZoneAddress>::BanID, Instant>,
 }
 
 #[derive(BorshDeserialize)]
 struct DeserPeerDataV1<A: NetZoneAddress> {
     white_list: Vec<ZoneSpecificPeerListEntryBase<A>>,
     gray_list: Vec<ZoneSpecificPeerListEntryBase<A>>,
+    banned_peers: HashMap<<A as NetZoneAddress>::BanID, u64>,
 }
 
 pub fn save_peers_to_disk<Z: BorshNetworkZone>(
     cfg: &AddressBookConfig,
     white_list: &PeerList<Z>,
     gray_list: &PeerList<Z>,
+     banned_peers: &HashMap<<Z::Addr as NetZoneAddress>::BanID, Instant>,
 ) -> JoinHandle<std::io::Result<()>> {
     // maybe move this to another thread but that would require cloning the data ... this
     // happens so infrequently that it's probably not worth it.
     let data = to_vec(&SerPeerDataV1 {
         white_list: white_list.peers.values().collect::<Vec<_>>(),
         gray_list: gray_list.peers.values().collect::<Vec<_>>(),
+        banned_peers,
     })
     .unwrap();
 
@@ -69,6 +73,7 @@ mod tests {
         let data = to_vec(&SerPeerDataV1 {
             white_list: white_list.peers.values().collect::<Vec<_>>(),
             gray_list: gray_list.peers.values().collect::<Vec<_>>(),
+            banned_peers,
         })
         .unwrap();
 
