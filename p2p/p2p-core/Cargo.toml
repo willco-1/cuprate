@@ -25,8 +25,7 @@ thiserror = { workspace = true }
 tracing = { workspace = true, features = ["std", "attributes"] }
 hex-literal = { workspace = true }
 
-borsh = { workspace = true, features = ["derive", "std"], optional = true }
-
+borsh = { git =" https://github.com/willco-1/borsh-rs.git", features = ["derive", "std"], optional = true }
 [dev-dependencies]
 cuprate-test-utils = {path = "../../test-utils"}
 

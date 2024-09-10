@@ -23,7 +23,8 @@ indexmap = { workspace = true, features = ["std"] }
 
 rand = { workspace = true, features = ["std", "std_rng"] }
 
-borsh = { workspace = true, features = ["derive", "std"]}
+borsh = { git =" https://github.com/willco-1/borsh-rs.git", features = ["derive", "std"], optional = true }
+
 
 [dev-dependencies]
 cuprate-test-utils = {path = "../../test-utils"}

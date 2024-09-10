@@ -54,6 +54,35 @@ fn make_fake_peer_list_with_random_pruning_seeds(
     }
     PeerList::new(peer_list)
 }
+pub fn make_fake_peer_list_with_bans<Z: BorshNetworkZone>(
+    numb_o_peers: u32,
+) -> (PeerList<Z>, HashMap<Z::BanID, Instant>)
+where
+    Z::Addr: NetZoneAddress,
+{
+    let mut r = rand::thread_rng();
+    let mut peer_list = Vec::with_capacity(numb_o_peers as usize);
+    let mut banned_peers = HashMap::new();
+
+    for idx in 0..numb_o_peers {
+        let peer = make_fake_peer(idx, None); // Assuming make_fake_peer returns a peer
+
+        if r.gen_bool(0.2) { // 20% chance of being banned
+            let ban_duration = Duration::from_secs(r.gen_range(3600..86400));
+            let ban_until = Instant::now() + ban_duration;
+
+
+            let ban_id = peer.addr.ban_id();
+            banned_peers.insert(ban_id, ban_until);
+        }
+
+        peer_list.push(peer);
+    }
+
+    let peer_list = PeerList::new(peer_list);
+
+    (peer_list, banned_peers)
+}
 
 #[test]
 fn peer_list_reduce_length() {

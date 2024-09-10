@@ -103,6 +103,9 @@ impl<Z: BorshNetworkZone> AddressBook<Z> {
         }
     }
 
+
+
+
     fn poll_save_to_disk(&mut self, cx: &mut Context<'_>) {
         if let Some(handle) = &mut self.peer_save_task_handle {
             // if we have already spawned a task to save the peer list wait for that to complete.
@@ -130,6 +133,7 @@ impl<Z: BorshNetworkZone> AddressBook<Z> {
             &self.cfg,
             &self.white_list,
             &self.gray_list,
+            &self.banned_peers,
         ));
     }
 
