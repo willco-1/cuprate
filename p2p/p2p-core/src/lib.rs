@@ -110,7 +110,7 @@ pub trait NetZoneAddress:
     /// - TODO: IP zone banning?
     /// - TODO: rename this to Host.
 
-    type BanID: Debug + Hash + Eq + Clone + Copy + Send + 'static;
+    type BanID: Debug + Hash + Eq + Clone + Copy + Ord + Send + 'static;
 
     /// Changes the port of this address to `port`.
     fn set_port(&mut self, port: u16);
@@ -161,7 +161,7 @@ pub trait NetworkZone: Clone + Copy + Send + 'static {
 
     /// Connects to a peer with the given address.
     ///
-    /// <div class="warning">    
+    /// <div class="warning">
     ///
     /// This does not complete a handshake with the peer, to do that see the [crate](crate) docs.
     ///

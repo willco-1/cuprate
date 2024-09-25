@@ -95,6 +95,7 @@ mod sealed {
     impl<T: NetworkZone> BorshNetworkZone for T
     where
         T::Addr: borsh::BorshDeserialize + borsh::BorshSerialize,
+        <T::Addr as NetZoneAddress>::BanID: borsh::BorshDeserialize + borsh::BorshSerialize,
     {
         type BorshAddr = T::Addr;
     }

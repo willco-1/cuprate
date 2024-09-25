@@ -23,7 +23,7 @@ use cuprate_wire::{
 use cuprate_p2p_core::{NetZoneAddress, NetworkZone};
 
 /// An address on the test network
-#[derive(Debug, Clone, Copy, Eq, Hash, PartialEq, BorshSerialize, BorshDeserialize)]
+#[derive(Debug, Clone, Copy, Ord, PartialOrd, Eq, Hash, PartialEq, BorshSerialize, BorshDeserialize)]
 pub struct TestNetZoneAddr(pub u32);
 
 impl NetZoneAddress for TestNetZoneAddr {

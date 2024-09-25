@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use borsh::{from_slice, to_vec, BorshDeserialize, BorshSerialize};
 use tokio::task::{spawn_blocking, JoinHandle};
+
 use tokio::time::Instant;
 
 use cuprate_p2p_core::{services::ZoneSpecificPeerListEntryBase, NetZoneAddress};
@@ -50,25 +51,24 @@ pub fn save_peers_to_disk<Z: BorshNetworkZone>(
 
 pub async fn read_peers_from_disk<Z: BorshNetworkZone>(
     cfg: &AddressBookConfig,
-) ->  Result<(
-    Vec<ZoneSpecificPeerListEntryBase<Z::Addr>>,
-    Vec<ZoneSpecificPeerListEntryBase<Z::Addr>>,
-    HashMap<<Z::Addr as NetZoneAddress>::BanID, Instant>,
-), std::io::Error> {
+) -> Result<
+    (
+        Vec<ZoneSpecificPeerListEntryBase<Z::Addr>>,
+        Vec<ZoneSpecificPeerListEntryBase<Z::Addr>>,
+    ),
+    std::io::Error,
+> {
     let file = cfg.peer_store_file.clone();
-    let mut file = File::open(&file).await?;
-    let deser_peer_data: DeserPeerDataV1<Z::Addr> = from_reader(&mut file)?;
+    let data = spawn_blocking(move || fs::read(file)).await??;
 
-    let banned_peers = deser_peer_data.banned_peers.into_iter()
-        .map(|(ban_id, timestamp)| (ban_id, Instant::now() + Duration::from_millis(timestamp)))
-        .collect();
+    let de_ser: DeserPeerDataV1<Z::Addr> = from_slice(&data)?;
 
-    Ok((deser_peer_data.white_list, deser_peer_data.gray_list, banned_peers))
+    Ok((de_ser.white_list, de_ser.gray_list))
 }
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::peer_list::{tests::make_fake_peer_list, PeerList};
+    use crate::peer_list::{tests::{make_fake_peer_list,make_fake_peer_list_with_bans}, PeerList};
     use cuprate_test_utils::test_netzone::{TestNetZone, TestNetZoneAddr};
     use std::time::{Instant, Duration};
 
